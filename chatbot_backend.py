@@ -159,4 +159,6 @@ if __name__ == '__main__':
     print("\n💡 Make sure your API key is configured in config.py")
     print("📝 Open chatbot_frontend.html in your browser to start chatting!")
     print("=" * 70)
+
+    port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=5000)
