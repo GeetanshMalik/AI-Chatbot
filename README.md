@@ -26,16 +26,15 @@ An intelligent chatbot created by Geetansh Malik, powered by Google Gemini API.
 - NLP: NLTK
 - Speech: Web Speech API
 
-## Creator
-Geetansh Malik
-```
-
-### 4. Update `requirements.txt`
+## Update `requirements.txt`
 
 Make sure it has:
-```
+
 Flask==3.0.0
 flask-cors==4.0.0
 nltk==3.8.1
 google-generativeai>=0.8.0
 gunicorn==21.2.0
+
+## Creator
+Geetansh Malik
