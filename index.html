@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malik's AI Chatbot - Text & Voice</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -126,6 +129,95 @@
             position: relative;
             background: var(--message-bg);
             color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .message-content h1,
+        .message-content h2,
+        .message-content h3 {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .message-content p {
+            margin: 8px 0;
+        }
+
+        .message-content ul,
+        .message-content ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin: 4px 0;
+        }
+
+        .message-content strong {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .message-content em {
+            font-style: italic;
+        }
+
+        .message-content code {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .message-content pre {
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .message-content pre code {
+            background: none;
+            padding: 0;
+            color: #d4d4d4;
+            display: block;
+        }
+
+        .message-content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 12px;
+            margin: 10px 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        .message-content a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .message-content a:hover {
+            text-decoration: underline;
+        }
+
+        .message-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .message-content th,
+        .message-content td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .message-content th {
+            background: var(--chat-bg);
+            font-weight: 600;
         }
 
         .message.user .message-content {
@@ -162,6 +254,11 @@
 
         .speak-btn.speaking {
             animation: pulse 1s infinite;
+            background: #e74c3c;
+        }
+
+        .speak-btn.speaking::before {
+            content: '⏸️';
         }
 
         .input-container {
@@ -276,7 +373,6 @@
             color: #666;
         }
 
-        /* Settings Modal */
         .modal {
             display: none;
             position: fixed;
@@ -354,7 +450,6 @@
             margin-top: 5px;
         }
 
-        /* Toggle Switch */
         .switch {
             position: relative;
             display: inline-block;
@@ -422,7 +517,7 @@
     <div class="container">
         <div class="header">
             <div class="header-left">
-                <h1>🤖 Malik's AI Chatbot</h1>
+                <h1>🤖 Malik's AI Chatbot </h1>
                 <p>Chat with text or voice • Click ⚙️ for settings</p>
             </div>
             <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
@@ -431,9 +526,16 @@
         <div class="chat-container" id="chatContainer">
             <div class="message bot">
                 <div class="message-content">
-                    Hello! I'm your AI assistant. You can type or use voice to chat with me. Click the speaker button 🔊 to hear any message, or enable auto-speak in settings!
+                    <p>Hello! I'm your AI assistant. You can:</p>
+                    <ul>
+                        <li>💬 <strong>Type</strong> your message</li>
+                        <li>🎤 <strong>Speak</strong> using voice input</li>
+                        <li>🔊 <strong>Click speaker button</strong> to hear any message</li>
+                        <li>⚙️ <strong>Open settings</strong> for more options</li>
+                    </ul>
+                    <p>Try asking me for code examples, explanations, or anything else!</p>
                 </div>
-                <button class="speak-btn" onclick="speakMessage(this)" title="Listen to this message">🔊</button>
+                <button class="speak-btn" onclick="toggleSpeakMessage(this)" title="Listen to this message">🔊</button>
             </div>
             <div class="typing-indicator" id="typingIndicator">
                 <span></span>
@@ -520,6 +622,14 @@
         };
 
         window.onload = function() {
+            // Configure marked.js
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                headerIds: false,
+                mangle: false
+            });
+            
             loadSettings();
             loadVoices();
             
@@ -666,7 +776,7 @@
             showTyping();
 
             try {
-                const response = await fetch('https://ai-chatbot-lcp3.onrender.com/chat', {
+                const response = await fetch('http://localhost:5000/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -698,7 +808,15 @@
             
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
-            contentDiv.textContent = text;
+            
+            if (sender === 'bot') {
+                contentDiv.innerHTML = marked.parse(text);
+                contentDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            } else {
+                contentDiv.textContent = text;
+            }
             
             messageDiv.appendChild(contentDiv);
             
@@ -707,7 +825,7 @@
                 speakBtn.className = 'speak-btn';
                 speakBtn.innerHTML = '🔊';
                 speakBtn.title = 'Listen to this message';
-                speakBtn.onclick = function() { speakMessage(this); };
+                speakBtn.onclick = function() { toggleSpeakMessage(this); };
                 messageDiv.appendChild(speakBtn);
             }
             
@@ -715,16 +833,35 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        function speakMessage(button) {
-            const messageContent = button.previousElementSibling.textContent;
-            
-            speechSynthesis.cancel();
-            
-            button.classList.add('speaking');
-            
-            speakText(messageContent, function() {
+        function toggleSpeakMessage(button) {
+            // Check if currently speaking
+            if (button.classList.contains('speaking')) {
+                // Stop speaking
+                speechSynthesis.cancel();
                 button.classList.remove('speaking');
-            });
+                button.innerHTML = '🔊';
+                button.title = 'Listen to this message';
+            } else {
+                document.querySelectorAll('.speak-btn.speaking').forEach(btn => {
+                    btn.classList.remove('speaking');
+                    btn.innerHTML = '🔊';
+                    btn.title = 'Listen to this message';
+                });
+                
+                const messageContent = button.previousElementSibling.textContent;
+                
+                speechSynthesis.cancel();
+                
+                button.classList.add('speaking');
+                button.innerHTML = '⏸️';
+                button.title = 'Stop speaking';
+                
+                speakText(messageContent, function() {
+                    button.classList.remove('speaking');
+                    button.innerHTML = '🔊';
+                    button.title = 'Listen to this message';
+                });
+            }
         }
 
         function showTyping() {
