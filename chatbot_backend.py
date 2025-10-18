@@ -35,21 +35,27 @@ conversation_sessions = {}
 def get_gemini_response(user_input, session_id="default"):
     """Get response from Google Gemini AI"""
     try:
-        # Initialize or get existing chat session
         if session_id not in conversation_sessions:
-            # Create chat with system context
             conversation_sessions[session_id] = model.start_chat(history=[])
         
         chat = conversation_sessions[session_id]
         
-        # Add system context about who created this chatbot
         system_context = """You are an AI chatbot assistant created by Geetansh Malik. 
 You are powered by Google's Gemini API, which provides your intelligence and language capabilities.
 When someone asks who made you or who created you, you should say:
 "I was created by Geetansh Malik using Google's Gemini API for my AI capabilities."
 
 You can chat in multiple languages including English, Hindi, and others.
-Be helpful, friendly, and informative."""
+Be helpful, friendly, and informative.
+
+IMPORTANT FORMATTING RULES:
+- When providing code, ALWAYS wrap it in triple backticks with the language name (```python, ```javascript, etc.)
+- Use **bold** for emphasis
+- Use bullet points with - or * for lists
+- Use numbered lists with 1. 2. 3. for steps
+- Keep responses well-structured and formatted
+- For multi-step explanations, use clear numbered steps
+- For code snippets, always use proper markdown code blocks"""
 
         # Prepend context only for questions about creator/identity
         if any(word in user_input.lower() for word in ['who made', 'who created', 'who built', 'your creator', 'your maker', 'who are you']):
@@ -76,7 +82,7 @@ def get_fallback_response(user_input):
     
     # About the bot
     elif any(phrase in user_input_lower for phrase in ['who are you', 'what are you', 'your name']):
-        return "I'm an AI chatbot powered by Google Gemini. I'm here to chat and help you with questions!"
+        return "I'm an AI chatbot & I was created by Geetansh Malik using Google's Gemini API for my AI capabilities. I'm here to chat and help you with questions!"
     
     # How are you
     elif any(phrase in user_input_lower for phrase in ['how are you', 'how do you do']):
@@ -131,7 +137,7 @@ def health():
     return jsonify({
         'status': 'healthy', 
         'message': 'Chatbot is running!',
-        'ai_model': 'Google Gemini 2.5 Flash'
+        'ai_model': 'Google Gemini 1.5 Flash'
     })
 
 @app.route('/reset', methods=['POST'])
@@ -159,6 +165,4 @@ if __name__ == '__main__':
     print("\n💡 Make sure your API key is configured in config.py")
     print("📝 Open chatbot_frontend.html in your browser to start chatting!")
     print("=" * 70)
-
-    port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=5000)
