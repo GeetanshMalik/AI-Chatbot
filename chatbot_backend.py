@@ -15,10 +15,13 @@ app = Flask(__name__)
 CORS(app)
 
 # Configure Gemini API
+# IMPORTANT: For security, the API key should be in a separate config file or environment variable
+# Never commit your API key to GitHub!
 try:
     from config import GEMINI_API_KEY
     genai.configure(api_key=GEMINI_API_KEY)
 except ImportError:
+    # Fallback to environment variable if config.py doesn't exist
     api_key = os.getenv('GEMINI_API_KEY')
     if api_key:
         genai.configure(api_key=api_key)
@@ -28,16 +31,20 @@ except ImportError:
 # Initialize Gemini model (using current available model)
 model = genai.GenerativeModel('gemini-2.0-flash-exp')
 
+# Conversation history for context
 conversation_sessions = {}
 
 def get_gemini_response(user_input, session_id="default"):
     """Get response from Google Gemini AI"""
     try:
+        # Initialize or get existing chat session
         if session_id not in conversation_sessions:
+            # Create chat with system context
             conversation_sessions[session_id] = model.start_chat(history=[])
         
         chat = conversation_sessions[session_id]
         
+        # Add system context about who created this chatbot
         system_context = """You are an AI chatbot assistant created by Geetansh Malik. 
 You are powered by Google's Gemini API, which provides your intelligence and language capabilities.
 When someone asks who made you or who created you, you should say:
@@ -61,6 +68,7 @@ IMPORTANT FORMATTING RULES:
         else:
             full_input = user_input
         
+        # Send message and get response
         response = chat.send_message(full_input)
         
         return response.text
@@ -175,5 +183,7 @@ if __name__ == '__main__':
     print("✅ Using Google Gemini 2.0 Flash AI Model")
     print("=" * 70)
     
+    # Get port from environment variable (Render/Railway/etc provides this)
     port = int(os.environ.get('PORT', 5000))
+    # Set debug=False for production
     app.run(debug=False, host='0.0.0.0', port=port)
