@@ -15,6 +15,8 @@ app = Flask(__name__)
 CORS(app)
 
 # Configure Gemini API
+# IMPORTANT: For security, the API key should be in a separate config file or environment variable
+# Never commit your API key to GitHub!
 try:
     from config import GEMINI_API_KEY
     genai.configure(api_key=GEMINI_API_KEY)
@@ -35,11 +37,14 @@ conversation_sessions = {}
 def get_gemini_response(user_input, session_id="default"):
     """Get response from Google Gemini AI"""
     try:
+        # Initialize or get existing chat session
         if session_id not in conversation_sessions:
+            # Create chat with system context
             conversation_sessions[session_id] = model.start_chat(history=[])
         
         chat = conversation_sessions[session_id]
         
+        # Add system context about who created this chatbot
         system_context = """You are an AI chatbot assistant created by Geetansh Malik. 
 You are powered by Google's Gemini API, which provides your intelligence and language capabilities.
 When someone asks who made you or who created you, you should say:
@@ -57,6 +62,7 @@ IMPORTANT FORMATTING RULES:
 - For multi-step explanations, use clear numbered steps
 - For code snippets, always use proper markdown code blocks"""
 
+        # Prepend context only for questions about creator/identity
         if any(word in user_input.lower() for word in ['who made', 'who created', 'who built', 'your creator', 'your maker', 'who are you']):
             full_input = f"{system_context}\n\nUser question: {user_input}"
         else:
@@ -81,7 +87,7 @@ def get_fallback_response(user_input):
     
     # About the bot
     elif any(phrase in user_input_lower for phrase in ['who are you', 'what are you', 'your name']):
-        return "I'm an AI chatbot & I was created by Geetansh Malik using Google's Gemini API for my AI capabilities. I'm here to chat and help you with questions!"
+        return "I'm an AI chatbot powered by Google Gemini. I'm here to chat and help you with questions!"
     
     # How are you
     elif any(phrase in user_input_lower for phrase in ['how are you', 'how do you do']):
@@ -158,11 +164,11 @@ if __name__ == '__main__':
     print("=" * 70)
     print("🤖 Starting AI Chatbot Server with Google Gemini Integration")
     print("=" * 70)
-    print("✅ Server running on https://ai-chatbot-lcp3.onrender.com")
-    print("✅ Using Google Gemini 1.5 Flash AI Model")
-    print("✅ Smart responses with conversation memory")
-    print("\n💡 Make sure your API key is configured in config.py")
-    print("📝 Open chatbot_frontend.html in your browser to start chatting!")
+    print("✅ Server running")
+    print("✅ Using Google Gemini 2.0 Flash AI Model")
     print("=" * 70)
-    app.run(debug=True, host='0.0.0.0', port=5000)
-
+    
+    # Get port from environment variable (Render/Railway/etc provides this)
+    port = int(os.environ.get('PORT', 5000))
+    # Set debug=False for production
+    app.run(debug=False, host='0.0.0.0', port=port)
