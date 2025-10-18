@@ -57,7 +57,6 @@ IMPORTANT FORMATTING RULES:
 - For multi-step explanations, use clear numbered steps
 - For code snippets, always use proper markdown code blocks"""
 
-        # Prepend context only for questions about creator/identity
         if any(word in user_input.lower() for word in ['who made', 'who created', 'who built', 'your creator', 'your maker', 'who are you']):
             full_input = f"{system_context}\n\nUser question: {user_input}"
         else:
@@ -159,10 +158,11 @@ if __name__ == '__main__':
     print("=" * 70)
     print("🤖 Starting AI Chatbot Server with Google Gemini Integration")
     print("=" * 70)
-    print("✅ Server running on http://localhost:5000")
+    print("✅ Server running on https://ai-chatbot-lcp3.onrender.com")
     print("✅ Using Google Gemini 1.5 Flash AI Model")
     print("✅ Smart responses with conversation memory")
     print("\n💡 Make sure your API key is configured in config.py")
     print("📝 Open chatbot_frontend.html in your browser to start chatting!")
     print("=" * 70)
     app.run(debug=True, host='0.0.0.0', port=5000)
+
