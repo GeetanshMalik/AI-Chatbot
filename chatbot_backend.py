@@ -12,7 +12,7 @@ except LookupError:
     nltk.download('punkt')
 
 app = Flask(__name__)
-CORS(app, origins=["https://ai-chatbot-ten-beige-36.vercel.app/", "http://localhost:3000", "https://*.vercel.app"])
+CORS(app, origins=["https://ai-chatbot-ten-beige-36.vercel.app", "http://localhost:3000", "https://*.vercel.app"])
 
 # Configure Gemini API
 try:
