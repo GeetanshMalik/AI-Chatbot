@@ -26,8 +26,8 @@ except ImportError:
     else:
         print("⚠️ WARNING: No API key found! Please create config.py or set GEMINI_API_KEY environment variable")
 
-# Initialize Gemini model (using current available model)
-model = genai.GenerativeModel('gemini-2.0-flash-exp')
+# Initialize Gemini model (using stable model)
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 conversation_sessions = {}
 
